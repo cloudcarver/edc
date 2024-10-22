@@ -46,7 +46,7 @@ func marshallRawYAML(yamlRaw []byte, cfg any) error {
 }
 
 func readConfigFromPathAndEnv(prefix, configPath string) ([]byte, error) {
-	var config map[string]any
+	config := map[string]any{}
 	var err error
 	if len(configPath) != 0 {
 		config, err = readFromConfigFile(configPath)
