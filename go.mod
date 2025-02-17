@@ -1,6 +1,6 @@
 module github.com/cloudcarver/edc
 
-go 1.22.5
+go 1.23
 
 require (
 	github.com/pkg/errors v0.9.1

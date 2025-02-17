@@ -1,0 +1,22 @@
+package test
+
+// Database holds the database configuration
+type Database struct {
+	// Host is the database server hostname
+	Host string `yaml:"host"`
+
+	// Port is the database server port number
+	Port int `yaml:"port"`
+}
+
+type Cache struct {
+}
+
+// Config is the main configuration struct
+type Config struct {
+	// Database configuration section
+	Database Database `yaml:"database"`
+
+	Port  int    `yaml:"port"`
+	Cache *Cache `yaml:"cache"`
+}
