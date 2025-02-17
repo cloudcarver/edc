@@ -3,7 +3,7 @@ package test
 // Database holds the database configuration
 type Database struct {
 	// Host is the database server hostname
-	Host string `yaml:"host"`
+	Host string `yaml:"host,omitempty"`
 
 	// Port is the database server port number
 	Port int `yaml:"port"`

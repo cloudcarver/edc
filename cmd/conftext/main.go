@@ -76,7 +76,10 @@ func getYAMLTag(tag string) string {
 	tag = strings.Trim(tag, "`")
 	for _, tagPart := range strings.Split(tag, " ") {
 		if strings.HasPrefix(tagPart, "yaml:") {
-			return strings.Trim(strings.Split(tagPart, ":")[1], "\"")
+			// Extract the yaml tag content
+			content := strings.Trim(strings.Split(tagPart, ":")[1], "\"")
+			// Split by comma and take the first part as the field name
+			return strings.Split(content, ",")[0]
 		}
 	}
 	return ""
@@ -161,28 +164,47 @@ func processField(field *ast.Field, parentChain []Field, vars *[]EnvVar) {
 	processStructFields(field.Type, chain, vars)
 }
 
+// getEnvExampleValue returns an example value for environment variables based on the type
+func getEnvExampleValue(fieldType string) string {
+	baseType := strings.TrimPrefix(fieldType, "*")
+	switch {
+	case baseType == "string":
+		return "string"
+	case strings.HasPrefix(baseType, "int") || strings.HasPrefix(baseType, "uint"):
+		return "integer"
+	case strings.HasPrefix(baseType, "float"):
+		return "number"
+	case baseType == "bool":
+		return "true/false"
+	default:
+		return "string"
+	}
+}
+
 func printEnvText(vars []EnvVar) {
 	fmt.Println("Environment variable paths:")
+	fmt.Println("NAME                           VALUE           DESCRIPTION")
+	fmt.Println("----                          -----           -----------")
 	for _, v := range vars {
 		lastField := v.LastField()
 		if lastField.Comment != "" {
-			fmt.Printf("%-30s %-15s // %s\n", v.Path(), lastField.Type, lastField.Comment)
+			fmt.Printf("%-30s %-15s // %s\n", v.Path(), getEnvExampleValue(lastField.Type), lastField.Comment)
 		} else {
-			fmt.Printf("%-30s %s\n", v.Path(), lastField.Type)
+			fmt.Printf("%-30s %s\n", v.Path(), getEnvExampleValue(lastField.Type))
 		}
 	}
 }
 
 func printEnvMarkdown(vars []EnvVar) {
-	fmt.Println("| Environment Variable | Type | Description |")
-	fmt.Println("|---------------------|------|-------------|")
+	fmt.Println("| Environment Variable | Expected Value | Description |")
+	fmt.Println("|---------------------|----------------|-------------|")
 	for _, v := range vars {
 		lastField := v.LastField()
 		comment := lastField.Comment
 		if comment == "" {
 			comment = "-"
 		}
-		fmt.Printf("| `%s` | `%s` | %s |\n", v.Path(), lastField.Type, comment)
+		fmt.Printf("| `%s` | `%s` | %s |\n", v.Path(), getEnvExampleValue(lastField.Type), comment)
 	}
 }
 
@@ -198,8 +220,7 @@ func printYAMLSample(vars []EnvVar) {
 		for i, part := range parts {
 			if i == len(parts)-1 {
 				// Last part - print with a sample value based on type
-				sampleValue := getSampleValue(v.LastField().Type)
-				fmt.Printf("%s%s: %s\n", indent, part, sampleValue)
+				fmt.Printf("%s%s: %s\n", indent, part, getEnvExampleValue(v.LastField().Type))
 			} else {
 				if current != "" {
 					current += "."
@@ -212,25 +233,6 @@ func printYAMLSample(vars []EnvVar) {
 				indent += "  "
 			}
 		}
-	}
-}
-
-func getSampleValue(fieldType string) string {
-	switch fieldType {
-	case "string":
-		return "\"value\""
-	case "int":
-		return "42"
-	case "bool":
-		return "true"
-	case "*string":
-		return "\"value\""
-	case "*int":
-		return "42"
-	case "*bool":
-		return "true"
-	default:
-		return "\"value\""
 	}
 }
 
