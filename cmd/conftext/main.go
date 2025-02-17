@@ -12,12 +12,15 @@ import (
 	"strings"
 )
 
+const CurrentVersion = "v0.3.2"
+
 var (
 	path     string
 	markdown bool
 	env      bool
 	yaml     bool
 	prefix   string
+	version  bool
 )
 
 // Field represents a single field in the config structure
@@ -242,7 +245,13 @@ func main() {
 	flag.BoolVar(&env, "env", false, "output environment variables")
 	flag.BoolVar(&yaml, "yaml", false, "output yaml sample")
 	flag.StringVar(&prefix, "prefix", "", "prefix for environment variables")
+	flag.BoolVar(&version, "version", false, "print version and exit")
 	flag.Parse()
+
+	if version {
+		fmt.Println(CurrentVersion)
+		return
+	}
 
 	if path == "" {
 		log.Fatal("path is required")
