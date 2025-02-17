@@ -15,12 +15,13 @@ import (
 const CurrentVersion = "v0.3.2"
 
 var (
-	path     string
-	markdown bool
-	env      bool
-	yaml     bool
-	prefix   string
-	version  bool
+	path       string
+	markdown   bool
+	env        bool
+	yaml       bool
+	prefix     string
+	version    bool
+	structName string
 )
 
 // Field represents a single field in the config structure
@@ -245,12 +246,18 @@ func main() {
 	flag.BoolVar(&env, "env", false, "output environment variables")
 	flag.BoolVar(&yaml, "yaml", false, "output yaml sample")
 	flag.StringVar(&prefix, "prefix", "", "prefix for environment variables")
+	flag.StringVar(&structName, "struct", "", "name of the struct to parse")
 	flag.BoolVar(&version, "version", false, "print version and exit")
 	flag.Parse()
 
 	if version {
 		fmt.Println(CurrentVersion)
 		return
+	}
+
+	configStructName := "Config"
+	if structName != "" {
+		configStructName = structName
 	}
 
 	if path == "" {
@@ -286,7 +293,7 @@ func main() {
 		ast.Inspect(node, func(n ast.Node) bool {
 			if ts, ok := n.(*ast.TypeSpec); ok {
 				if st, ok := ts.Type.(*ast.StructType); ok {
-					if ts.Name.Name == "Config" {
+					if ts.Name.Name == configStructName {
 						configStruct = st
 						return false
 					}
