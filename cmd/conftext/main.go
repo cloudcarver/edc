@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-const CurrentVersion = "v0.3.2"
+const CurrentVersion = "v0.3.3"
 
 var (
 	path       string
